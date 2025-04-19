@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ATS Resume Score Checker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 80px auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 0 auto 20px auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background-color: #fafafa;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 10px 24px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        #result h2 {
+            color: #28a745;
+        }
+
+        p {
+            font-size: 16px;
+            color: #444;
+        }
+
+        strong {
+            color: #000;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ATS Resume Score Checker</h1>
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="file" name="resume" accept="application/pdf" required>
+            <button type="submit">Check Score</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const resultDiv = document.getElementById('result');
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            resultDiv.innerHTML = `<p>Analyzing your resume... please wait.</p>`;
+
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (data.error) {
+                resultDiv.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+            } else {
+                resultDiv.innerHTML = `
+                    <h2>✅ ATS Score: ${data.ats_score}%</h2>
+                    <p><strong>Matched Keywords:</strong> ${data.matched_keywords.join(', ') || 'None'}</p>
+                    <p><strong>Expected Keywords:</strong> ${data.total_keywords.join(', ')}</p>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
